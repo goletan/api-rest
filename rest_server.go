@@ -27,6 +27,8 @@ type RestConfig struct {
 	WriteTimeout time.Duration `mapstructure:"write_timeout"`
 	IdleTimeout  time.Duration `mapstructure:"idle_timeout"`
 	EnableTLS    bool          `mapstructure:"enable_tls"`
+	CertFilePath string        `mapstructure:"cert_file_path"`
+	KeyFilePath  string        `mapstructure:"key_file_path"`
 }
 
 var cfg *RestConfig
@@ -92,7 +94,7 @@ func (s *RESTServer) Start() error {
 		logger.Info("Starting REST server", zap.String("address", s.server.Addr))
 		var err error
 		if cfg.EnableTLS {
-			err = s.server.ListenAndServeTLS("", "") // Certificates are managed by the TLS configuration in the Security library
+			err = s.server.ListenAndServeTLS(cfg.CertFilePath, cfg.KeyFilePath) // Use configured certificate and key files
 		} else {
 			err = s.server.ListenAndServe()
 		}
