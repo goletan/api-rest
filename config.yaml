@@ -1,0 +1,6 @@
+rest:
+  address: "localhost:8080"
+  read_timeout: 15s
+  write_timeout: 15s
+  idle_timeout: 60s
+  enable_tls: false
