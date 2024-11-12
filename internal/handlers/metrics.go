@@ -1,11 +1,10 @@
-// /api-rest/metrics.go
-package rest
+// /api-rest/internal/handlers/metrics.go
+package handlers
 
 import (
 	"net/http"
 
-	"github.com/goletan/observability/metrics"
-	"github.com/goletan/observability/utils"
+	observability "github.com/goletan/observability/pkg"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -26,11 +25,17 @@ var (
 
 // Security Tool: Scrub sensitive data
 var (
-	scrubber = utils.NewScrubber()
+	scrubber = observability.NewScrubber()
 )
 
 func InitMetrics() {
-	metrics.NewManager().Register(&RestMetrics{})
+	obs, err := observability.NewObserver()
+	if err != nil {
+		obs.Logger.Error("cannot observe REST API")
+		return
+	}
+
+	obs.Metrics.Register(&RestMetrics{})
 }
 
 func (em *RestMetrics) Register() error {
