@@ -8,7 +8,7 @@ require (
 	github.com/goletan/security v0.0.0-00010101000000-000000000000
 	github.com/goletan/services v0.0.0-00010101000000-000000000000
 	github.com/gorilla/mux v1.8.1
-	github.com/prometheus/client_golang v1.20.4
+	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 )
