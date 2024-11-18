@@ -3,7 +3,7 @@ module github.com/goletan/api-rest
 go 1.23
 
 require (
-	github.com/goletan/config v0.0.0-00010101000000-000000000000
+	github.com/goletan/config v0.0.1
 	github.com/goletan/observability v0.0.0-00010101000000-000000000000
 	github.com/goletan/security v0.0.0-00010101000000-000000000000
 	github.com/goletan/services v0.0.0-00010101000000-000000000000
@@ -13,13 +13,13 @@ require (
 	go.uber.org/zap v1.27.0
 )
 
-replace github.com/goletan/config => ../config
+replace github.com/goletan/config => github.com/goletan/config v0.0.0-20241117132450-f61d955a9e0c
 
-replace github.com/goletan/observability => ../observability
+replace github.com/goletan/services => github.com/goletan/services v0.0.0-20241117132350-1674504dc8db
 
-replace github.com/goletan/services => ../services
+replace github.com/goletan/observability => github.com/goletan/observability v0.0.0-20241117132404-5648f11b3f84
 
-replace github.com/goletan/security => ../security
+replace github.com/goletan/security => github.com/goletan/security v0.0.0-20241117132334-1b2a6a608bf9
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
