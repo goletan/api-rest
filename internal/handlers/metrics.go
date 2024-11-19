@@ -28,13 +28,7 @@ var (
 	scrubber = observability.NewScrubber()
 )
 
-func InitMetrics() {
-	obs, err := observability.NewObserver()
-	if err != nil {
-		obs.Logger.Error("cannot observe REST API")
-		return
-	}
-
+func InitMetrics(obs *observability.Observability) {
 	obs.Metrics.Register(&RestMetrics{})
 }
 
