@@ -11,12 +11,16 @@ func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
+	// Load the observability configuration
 	cfg, err := observability.LoadObservabilityConfig(logger)
-
-	// Initialize observability (or pass nil if observability is not configured yet)
-	obs, err := observability.NewObserver(cfg)
 	if err != nil {
-		panic(err)
+		logger.Sugar().Fatalf("Failed to load observability configuration: %v", err)
+	}
+
+	// Initialize observability with the configuration
+	obs, err := observability.NewObserver(*cfg)
+	if err != nil {
+		logger.Sugar().Fatalf("Failed to initialize observability: %v", err)
 	}
 
 	// Create a new REST service

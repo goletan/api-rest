@@ -17,7 +17,7 @@ replace github.com/goletan/config => github.com/goletan/config v0.0.0-2024111713
 
 replace github.com/goletan/services => github.com/goletan/services v0.0.0-20241117132350-1674504dc8db
 
-replace github.com/goletan/observability => github.com/goletan/observability v0.0.0-20241117132404-5648f11b3f84
+replace github.com/goletan/observability => github.com/goletan/observability v0.0.0-20241119173057-77c28d310360
 
 replace github.com/goletan/security => github.com/goletan/security v0.0.0-20241117132334-1b2a6a608bf9
 
