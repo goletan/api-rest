@@ -18,7 +18,7 @@ func main() {
 	}
 
 	// Initialize observability with the configuration
-	obs, err := observability.NewObserver(*cfg)
+	obs, err := observability.NewObserver(cfg)
 	if err != nil {
 		logger.Sugar().Fatalf("Failed to initialize observability: %v", err)
 	}

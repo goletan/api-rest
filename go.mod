@@ -6,20 +6,19 @@ require (
 	github.com/goletan/config v0.0.1
 	github.com/goletan/observability v0.0.0-00010101000000-000000000000
 	github.com/goletan/security v0.0.0-00010101000000-000000000000
-	github.com/goletan/services v0.0.0-00010101000000-000000000000
 	github.com/gorilla/mux v1.8.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 )
 
-replace github.com/goletan/config => github.com/goletan/config v0.0.0-20241117132450-f61d955a9e0c
+replace github.com/goletan/config => github.com/goletan/config v0.0.0-20241119173119-8938465616ac
 
-replace github.com/goletan/services => github.com/goletan/services v0.0.0-20241117132350-1674504dc8db
+replace github.com/goletan/services => github.com/goletan/services v0.0.0-20241118174810-0d95a57e12ac
 
-replace github.com/goletan/observability => github.com/goletan/observability v0.0.0-20241119173057-77c28d310360
+replace github.com/goletan/observability => github.com/goletan/observability v0.0.0-20241119174103-a59ce9985ba2
 
-replace github.com/goletan/security => github.com/goletan/security v0.0.0-20241117132334-1b2a6a608bf9
+replace github.com/goletan/security => github.com/goletan/security v0.0.0-20241118174612-ad6849dc862d
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
