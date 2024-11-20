@@ -2,7 +2,7 @@
 package main
 
 import (
-	rest "github.com/goletan/api-rest/pkg"
+	"github.com/goletan/api-rest/internal/server"
 	observability "github.com/goletan/observability/pkg"
 	"go.uber.org/zap"
 )
@@ -23,11 +23,16 @@ func main() {
 		logger.Sugar().Fatalf("Failed to initialize observability: %v", err)
 	}
 
-	// Create a new REST service
-	service := rest.NewRESTService(obs)
+	// Create a new REST server instance
+	restServer := server.NewRESTServer(obs)
+
+	// Initialize the REST server
+	if err := restServer.Initialize(); err != nil {
+		logger.Sugar().Fatalf("Failed to initialize REST server: %v", err)
+	}
 
 	// Start the service
-	if err := service.Start(); err != nil {
+	if err := restServer.Start(); err != nil {
 		panic(err)
 	}
 }
