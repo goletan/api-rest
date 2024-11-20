@@ -16,9 +16,9 @@ replace github.com/goletan/config => github.com/goletan/config v0.0.0-2024111917
 
 replace github.com/goletan/services => github.com/goletan/services v0.0.0-20241118174810-0d95a57e12ac
 
-replace github.com/goletan/observability => github.com/goletan/observability v0.0.0-20241119174103-a59ce9985ba2
+replace github.com/goletan/observability => github.com/goletan/observability v0.0.0-20241120180741-8666be490102
 
-replace github.com/goletan/security => github.com/goletan/security v0.0.0-20241118174612-ad6849dc862d
+replace github.com/goletan/security => github.com/goletan/security v0.0.0-20241120180726-0d3d71c8743d
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

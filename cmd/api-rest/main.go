@@ -8,27 +8,17 @@ import (
 )
 
 func main() {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-
-	// Load the observability configuration
-	cfg, err := observability.LoadObservabilityConfig(logger)
-	if err != nil {
-		logger.Sugar().Fatalf("Failed to load observability configuration: %v", err)
-	}
-
 	// Initialize observability with the configuration
-	obs, err := observability.NewObserver(cfg)
+	obs, err := observability.NewObserver()
 	if err != nil {
-		logger.Sugar().Fatalf("Failed to initialize observability: %v", err)
+		panic(err)
 	}
 
 	// Create a new REST server instance
 	restServer := server.NewRESTServer(obs)
-
 	// Initialize the REST server
 	if err := restServer.Initialize(); err != nil {
-		logger.Sugar().Fatalf("Failed to initialize REST server: %v", err)
+		obs.Logger.Error("Failed to initialize REST server: %v", zap.Error(err))
 	}
 
 	// Start the service
