@@ -3,6 +3,6 @@ rest:
   read_timeout: 15s
   write_timeout: 15s
   idle_timeout: 60s
-  enable_tls: false
+  use_tls: true
   cert_file_path: "/certs/server.pem"
   key_file_path: "/certs/server.key"

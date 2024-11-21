@@ -3,6 +3,8 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -10,6 +12,7 @@ import (
 	config "github.com/goletan/config/pkg"
 	observability "github.com/goletan/observability/pkg"
 	security "github.com/goletan/security/pkg"
+	services "github.com/goletan/services/pkg"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
@@ -20,6 +23,8 @@ type RESTServer struct {
 	name           string
 	observability  *observability.Observability
 	securityModule *security.Security
+	config         *RestConfig
+	useTLS         bool
 }
 
 // RestConfig represents the REST server configuration.
@@ -28,7 +33,7 @@ type RestConfig struct {
 	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
 	WriteTimeout time.Duration `mapstructure:"write_timeout"`
 	IdleTimeout  time.Duration `mapstructure:"idle_timeout"`
-	EnableTLS    bool          `mapstructure:"enable_tls"`
+	UseTLS       bool          `mapstructure:"use_tls"`
 	CertFilePath string        `mapstructure:"cert_file_path"`
 	KeyFilePath  string        `mapstructure:"key_file_path"`
 }
@@ -36,10 +41,26 @@ type RestConfig struct {
 var cfg *RestConfig
 
 // NewRESTServer creates a new instance of the RESTServer.
-func NewRESTServer(obs *observability.Observability) *RESTServer {
+func NewRESTServer(obs *observability.Observability) services.Service {
+	cfg := loadRestConfig(obs)
+
+	// Setup Security
+	securityModule := setupSecurityModule(obs)
+	if securityModule == nil {
+		obs.Logger.Fatal("Security module could not be initialized")
+	}
+
+	// Setup server
+	server := setupServer(obs, securityModule, cfg)
+
+	// Create the RESTServer instance
 	return &RESTServer{
-		name:          "REST Server",
-		observability: obs,
+		server:         server,
+		name:           "REST Server",
+		observability:  obs,
+		securityModule: securityModule,
+		config:         cfg,
+		useTLS:         cfg.UseTLS,
 	}
 }
 
@@ -52,50 +73,32 @@ func (s *RESTServer) Name() string {
 func (s *RESTServer) Initialize() error {
 	s.observability.Logger.Info("Initializing REST server", zap.String("service", s.name))
 
-	// Load the REST configuration
-	cfg := &RestConfig{
-		Address:      ":8080",
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
-
-	err := config.LoadConfig("Rest", cfg, s.observability.Logger)
-	if err != nil {
-		s.observability.Logger.Warn("Failed to load REST configuration, using defaults", zap.Error(err))
-	}
-
-	// Set up the router
-	router := setupRouter(s.observability)
-	s.server = &http.Server{
-		Addr:              cfg.Address,
-		Handler:           router,
-		ReadTimeout:       cfg.ReadTimeout,
-		WriteTimeout:      cfg.WriteTimeout,
-		IdleTimeout:       cfg.IdleTimeout,
-		ReadHeaderTimeout: 5 * time.Second,
-	}
-
-	// Load and configure security module (mTLS)
+	// Setup Security Module again to ensure all security setups are reloaded if needed
 	s.securityModule = setupSecurityModule(s.observability)
+	if s.securityModule == nil {
+		s.observability.Logger.Error("Failed to initialize security module during server initialization")
+		return fmt.Errorf("security module initialization failed")
+	}
 
 	return nil
 }
 
 // Start starts the REST server.
 func (s *RESTServer) Start() error {
-	go func() {
-		s.observability.Logger.Info("Starting REST server", zap.String("address", s.server.Addr))
-		var err error
-		if cfg.EnableTLS {
-			err = s.server.ListenAndServeTLS(cfg.CertFilePath, cfg.KeyFilePath)
-		} else {
-			err = s.server.ListenAndServe()
-		}
-		if err != nil && err != http.ErrServerClosed {
-			s.observability.Logger.Error("Failed to start REST server", zap.Error(err))
-		}
-	}()
+	s.observability.Logger.Info("Starting REST server", zap.String("address", s.server.Addr))
+	var err error
+	if s.useTLS {
+		err = s.server.ListenAndServeTLS(s.config.CertFilePath, s.config.KeyFilePath)
+	} else {
+		err = s.server.ListenAndServe()
+	}
+	if err != nil && err != http.ErrServerClosed {
+		s.observability.Logger.Error("Failed to start REST server", zap.Error(err))
+		return err
+	}
+	if err == http.ErrServerClosed {
+		s.observability.Logger.Info("REST server has been stopped gracefully")
+	}
 	return nil
 }
 
@@ -107,15 +110,47 @@ func (s *RESTServer) Stop() error {
 	return s.server.Shutdown(ctx)
 }
 
+func setupServer(obs *observability.Observability, securityModule *security.Security, cfg *RestConfig) *http.Server {
+	var tlsConfig *tls.Config
+	var err error
+
+	// Configure TLS
+	if securityModule != nil {
+		tlsConfig, err = securityModule.CertLoader.LoadServerTLSConfig()
+		if err != nil {
+			obs.Logger.Warn("Failed to configure mTLS, proceeding without TLS", zap.Error(err))
+		}
+	} else {
+		obs.Logger.Warn("Security module is nil, proceeding without TLS")
+	}
+
+	// Set up the router
+	router := setupRouter(obs)
+
+	// Initialize HTTP server
+	server := &http.Server{
+		Addr:              cfg.Address,
+		Handler:           router,
+		ReadTimeout:       cfg.ReadTimeout,
+		WriteTimeout:      cfg.WriteTimeout,
+		IdleTimeout:       cfg.IdleTimeout,
+		ReadHeaderTimeout: 5 * time.Second,
+		TLSConfig:         tlsConfig,
+	}
+
+	return server
+}
+
 func loadRestConfig(obs *observability.Observability) *RestConfig {
 	cfg := &RestConfig{
 		Address:      ":8080",
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 		IdleTimeout:  60 * time.Second,
+		UseTLS:       false,
 	}
 
-	err := config.LoadConfig("Rest", cfg, obs.Logger)
+	err := config.LoadConfig("REST", cfg, obs.Logger)
 	if err != nil {
 		obs.Logger.Warn("Failed to load REST configuration, using defaults", zap.Error(err))
 	}
@@ -136,9 +171,10 @@ func setupRouter(obs *observability.Observability) *mux.Router {
 }
 
 func setupSecurityModule(obs *observability.Observability) *security.Security {
-	securityModule, secErr := security.NewSecurity(obs.Logger)
-	if secErr != nil {
-		obs.Logger.Error("Failed to initialize security module", zap.Error(secErr))
+	securityModule, err := security.NewSecurity(obs.Logger)
+	if err != nil {
+		obs.Logger.Error("Failed to initialize security module", zap.Error(err))
+		return nil
 	}
 	return securityModule
 }

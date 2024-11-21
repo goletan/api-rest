@@ -11,11 +11,12 @@ func main() {
 	// Initialize observability with the configuration
 	obs, err := observability.NewObserver()
 	if err != nil {
-		panic(err)
+		obs.Logger.Error("Failed to initialize observability: %v", zap.Error(err))
 	}
 
 	// Create a new REST server instance
 	restServer := server.NewRESTServer(obs)
+
 	// Initialize the REST server
 	if err := restServer.Initialize(); err != nil {
 		obs.Logger.Error("Failed to initialize REST server: %v", zap.Error(err))

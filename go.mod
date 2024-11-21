@@ -3,16 +3,17 @@ module github.com/goletan/api-rest
 go 1.23
 
 require (
-	github.com/goletan/config v0.0.1
+	github.com/goletan/config v0.0.0-20241121121134-ea241b29ea36
 	github.com/goletan/observability v0.0.0-00010101000000-000000000000
 	github.com/goletan/security v0.0.0-00010101000000-000000000000
+	github.com/goletan/services v0.0.0-00010101000000-000000000000
 	github.com/gorilla/mux v1.8.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 )
 
-replace github.com/goletan/config => github.com/goletan/config v0.0.0-20241119173119-8938465616ac
+replace github.com/goletan/config => github.com/goletan/config v0.0.0-20241121121134-ea241b29ea36
 
 replace github.com/goletan/services => github.com/goletan/services v0.0.0-20241118174810-0d95a57e12ac
 
